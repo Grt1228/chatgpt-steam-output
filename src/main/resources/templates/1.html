@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script>
+        window.onload = function () {
+            let connectBtn = document.getElementById("connectSSE");
+            let disconnectBtn = document.getElementById("disconnectSSE");
+            let userIdElement = document.getElementById("userId");
+            let userIdInfoElement = document.getElementById("userIdInfo");
+            let sse;
+            connectBtn.onclick = function () {
+                if (!userIdElement.value) {
+                    userIdInfoElement.innerText = "userId is empty";
+                    console.log("userId is empty")
+                    return;
+                }
+                userIdInfoElement.innerText = userIdElement.value;
+                const eventSource = new EventSource('http://localhost:8080/test/sse?uid=' + userIdElement.value);
+                eventSource.onopen = (event) => {
+                    console.log("onopen", event.readyState, event.target);
+                    sse = event.target;
+                    let element = document.getElementById("onOpenInfo");
+                    element.innerText = JSON.stringify(event.target);
+                };
+                eventSource.onmessage = (event) => {
+                    let element = document.getElementById("onMessageInfo");
+                    element.innerText = event.data;
+                };
+                eventSource.onerror = (event) => {
+                    console.log("onerror", event);
+                    if (event.readyState === EventSource.CLOSED) {
+                        console.log('connection is closed');
+                    } else {
+                        console.log("Error occured", event);
+                    }
+                    event.target.close();
+                    let element = document.getElementById("onErrorInfo");
+                    element.innerText = JSON.stringify(event);
+                };
+                eventSource.addEventListener("customEventName", (event) => {
+                    console.log("Message id is " + event.lastEventId);
+                });
+            };
+
+            disconnectBtn.onclick = function () {
+                if (sse) {
+                    sse.close();
+                }
+            };
+
+        };
+    </script>
+</head>
+<body>
+
+<div>
+    <input id="userId" type="text">
+    <button id="connectSSE">Connect</button>
+    <button id="disconnectSSE">Disconnect</button>
+</div>
+
+<div>
+    userId: <span id="userIdInfo"></span>
+</div>
+
+<div>
+    onOpen: <span id="onOpenInfo"></span>
+</div>
+
+<div>
+    onMessage: <span id="onMessageInfo"></span>
+</div>
+
+<div>
+    onError: <span id="onErrorInfo"></span>
+</div>
+
+</body>
+</html>
