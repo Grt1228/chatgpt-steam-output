@@ -30,4 +30,4 @@ com.unfbx.chatgptsteamoutput.listener.OpenAIEventSourceListener并持有一个Ss
 重点关注下header：**Content-Type：text/event-stream**
 
 
-### **如果想结合前端显示自行百度sse前端接受**
+### **如果想结合前端显示自行百度sse前端相关实现**
