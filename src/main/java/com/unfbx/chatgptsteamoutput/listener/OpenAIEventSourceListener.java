@@ -44,6 +44,10 @@ public class OpenAIEventSourceListener extends EventSourceListener {
         log.info("OpenAI返回数据：{}", data);
         if (data.equals("[DONE]")) {
             log.info("OpenAI返回数据结束了");
+            sseEmitter.send(SseEmitter.event()
+                    .id("[DONE]")
+                    .data("[DONE]")
+                    .reconnectTime(3000));
             return;
         }
         ObjectMapper mapper = new ObjectMapper();
@@ -64,6 +68,9 @@ public class OpenAIEventSourceListener extends EventSourceListener {
     @SneakyThrows
     @Override
     public void onFailure(EventSource eventSource, Throwable t, Response response) {
+        if(Objects.isNull(response)){
+            return;
+        }
         ResponseBody body = response.body();
         if (Objects.nonNull(body)) {
             log.error("OpenAI  sse连接异常data：{}，异常：{}", body.string(), t);
