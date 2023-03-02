@@ -26,6 +26,8 @@ com.unfbx.chatgptsteamoutput.listener.OpenAIEventSourceListener并持有一个Ss
 发送请求：**Get http://localhost:8080/test/sse?uid=123**
 
 看下response （需要新版本postman）我发现老版本不支持，就先不上图了，后续补上去
+![image](https://user-images.githubusercontent.com/27008803/222306531-e3de023e-41bf-48fe-b181-cd779695b0c7.png)
+
 
 重点关注下header：**Content-Type：text/event-stream**
 
