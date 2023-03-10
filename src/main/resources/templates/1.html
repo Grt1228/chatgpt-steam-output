@@ -1,32 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
+<link href="./markdown.css" rel="stylesheet" type="text/css" />
+
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+    <script src="./markdown.min.js"></script>
     <script>
+        function setText(text, uuid_str) {
+            let content = document.getElementById(uuid_str)
+            content.innerHTML = marked(text);
+        }
+        function uuid() {
+            var s = [];
+            var hexDigits = "0123456789abcdef";
+            for (var i = 0; i < 36; i++) {
+                s[i] = hexDigits.substr(Math.floor(Math.random() * 0x10), 1);
+            }
+            s[14] = "4"; // bits 12-15 of the time_hi_and_version field to 0010
+            s[19] = hexDigits.substr((s[19] & 0x3) | 0x8, 1); // bits 6-7 of the clock_seq_hi_and_reserved to 01
+            s[8] = s[13] = s[18] = s[23] = "-";
+
+            var uuid = s.join("");
+            return uuid;
+        }
         window.onload = function () {
             let connectBtn = document.getElementById("connectSSE");
             let disconnectBtn = document.getElementById("disconnectSSE");
-            let userIdElement = document.getElementById("userId");
-            let userIdInfoElement = document.getElementById("userIdInfo");
+            let messageElement = document.getElementById("message");
+            // let userIdInfoElement = document.getElementById("userIdInfo");
+            let chat = document.getElementById("chat");
             let sse;
             connectBtn.onclick = function () {
-                if (!userIdElement.value) {
+                if (!messageElement.value) {
                     userIdInfoElement.innerText = "userId is empty";
                     console.log("userId is empty")
                     return;
                 }
-                userIdInfoElement.innerText = userIdElement.value;
-                const eventSource = new EventSource('http://localhost:8080/test/sse?uid=' + userIdElement.value);
+                let text = '';
+                let uuid_str = uuid();
+                //新增问题框
+                chat.innerHTML += '<tr><td style="height: 50px;">' + messageElement.value + '</td></tr>';
+                //新增答案框
+                chat.innerHTML += '<tr><td><article id="' + uuid_str + '" class="markdown-body"></article></td></tr>';
+                const eventSource = new EventSource('http://localhost:8000/chat?message=' + messageElement.value);
                 eventSource.onopen = (event) => {
                     console.log("onopen", event.readyState, event.target);
                     sse = event.target;
-                    let element = document.getElementById("onOpenInfo");
-                    element.innerText = JSON.stringify(event.target);
+                    // let element = document.getElementById("onOpenInfo");
+                    // element.innerText = JSON.stringify(event.target);
                 };
                 eventSource.onmessage = (event) => {
-                    let element = document.getElementById("onMessageInfo");
-                    element.innerText = event.data;
+                    let element = document.getElementById(uuid_str);
+                    if (event.data == "[DONE]") {
+                        text = '';
+                        return;
+                    }
+                    let json_data = JSON.parse(event.data)
+                    if (json_data.content == null || json_data.content == 'null') {
+                        text = '';
+                        return;
+                    }
+                    text = text + json_data.content;
+                    setText(text, uuid_str)
                 };
                 eventSource.onerror = (event) => {
                     console.log("onerror", event);
@@ -36,8 +73,8 @@
                         console.log("Error occured", event);
                     }
                     event.target.close();
-                    let element = document.getElementById("onErrorInfo");
-                    element.innerText = JSON.stringify(event);
+                    // let element = document.getElementById("onErrorInfo");
+                    // element.innerText = JSON.stringify(event);
                 };
                 eventSource.addEventListener("customEventName", (event) => {
                     console.log("Message id is " + event.lastEventId);
@@ -53,29 +90,151 @@
         };
     </script>
 </head>
+
 <body>
+    <div class="float-card">
+        <div class="float-card-item">
+            <a href="https://www.unfbx.com" target="_blank" rel="noopener noreferrer">Website</a>
+        </div>
+        <div class="float-card-item">
+            <a href="https://github.com/Grt1228" target="_blank" rel="noopener noreferrer">Github</a>
+        </div>
+    </div>
+    <div class="input-card">
+        <div class="input-card-item">
+            <input style="height: 50px;width: 500px;font-size: 20px;" id="message" type="text">
+        </div>
+    </div>
+    <div class="container">
+        <button id="connectSSE">Connect</button>
+        <button id="disconnectSSE">Disconnect</button>
+        <table border="1">
+            <tbody id="chat">
+                <tr>
+                    <td>我是描述信息我是描述信息我是描述信息我是描述信息我是描述信息我是描述信息</td>
+                </tr>
+                <tr>
+                    <td>
+                        <article id="textContent" class="markdown-body"></article>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 
-<div>
-    <input id="userId" type="text">
-    <button id="connectSSE">Connect</button>
-    <button id="disconnectSSE">Disconnect</button>
-</div>
+    <!-- <div>
+        userId:
+        <span id="userIdInfo"></span>
+    </div>
 
-<div>
-    userId: <span id="userIdInfo"></span>
-</div>
+    <div>
+        onOpen:
+        <span id="onOpenInfo"></span>
+    </div>
 
-<div>
-    onOpen: <span id="onOpenInfo"></span>
-</div>
+    <div>
+        onMessage:
+        <span id="onMessageInfo"></span>
+    </div>
 
-<div>
-    onMessage: <span id="onMessageInfo"></span>
-</div>
-
-<div>
-    onError: <span id="onErrorInfo"></span>
-</div>
+    <div>
+        onError:
+        <span id="onErrorInfo"></span>
+    </div> -->
 
 </body>
+<style>
+    .markdown-body {
+        box-sizing: border-box;
+        min-width: 200px;
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 45px;
+    }
+
+    @media (max-width: 767px) {
+        .markdown-body {
+            padding: 15px;
+        }
+    }
+
+
+
+    .container {
+        width: 980px;
+        border: 1px solid black;
+        display: flex;
+        flex-direction: column;
+        margin-left: 25%;
+        margin-top: 50px;
+        /* align-items: center; 
+        justify-content: center; */
+    }
+
+    .input-card {
+        position: fixed;
+        display: inline-block;
+        right: 37%;
+        top: 80%;
+    }
+
+    .imput-card-item {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+
+    .float-card {
+        position: fixed;
+        display: inline-block;
+        right: 20px;
+        top: 20px;
+    }
+
+    .float-card-item {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background-color: #ccccd6;
+        margin-bottom: 16px;
+    }
+
+    .float-card-item:last-child {
+        margin-bottom: 0px;
+    }
+
+    .float-card-item a {
+        text-decoration: none;
+        color: #594649;
+        font-size: 13px;
+    }
+</style>
+
+<script>
+    // let allText = `\n\n要获取某一个 PostgreSQL 数据库的所有 schema，可以使用以下 SQL 查询：\n\nsql\nSELECT schema_name\nFROM information_schema.schemata\nWHERE catalog_name = 'your_database_name';\n\n\n将\`your_database_name\` 替换为你要查询的数据库名称即可。这个查询将返回一个包含所有 schema 名称的结果集。\n\n如果你想要获取默认 schema 以外的所有schema，可以在查询中添加一个条件：\n\n\`\`\`sql\nSELECT schema_name\nFROM information_schema.schemata\nWHERE catalog_name = 'your_database_name'\n AND schema_name != 'public';\n\`\`\`\n\n这个查询将返回除了默认 schema\`public\` 以外的所有 schema 名称。 `
+    // let text = ''
+    // let timer = null;
+    // timer = setInterval(() => {
+
+    //     text += allText[0];
+    //     allText = allText.substring(1)
+    //     setText(text)
+    //     if (allText == '') {
+    //         clearInterval(timer)
+    //     }
+    // }, 50)
+
+    // function setText(text) {
+    //     let content = document.querySelector('#textContent')
+    //     content.innerHTML = marked(text);
+    // }
+
+</script>
+
 </html>

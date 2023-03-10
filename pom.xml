@@ -14,7 +14,9 @@
     <name>chatgpt-steam-output</name>
     <description>chatgpt-steam-output</description>
     <properties>
-        <java.version>8</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <java.version>1.8</java.version>
     </properties>
     <dependencies>
         <dependency>
@@ -35,7 +37,7 @@
         <dependency>
             <groupId>com.unfbx</groupId>
             <artifactId>chatgpt-java</artifactId>
-            <version>1.0.2</version>
+            <version>1.0.5</version>
         </dependency>
     </dependencies>
 

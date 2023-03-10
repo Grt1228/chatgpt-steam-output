@@ -21,8 +21,7 @@ public class ChatgptSteamOutputApplication {
 
     @Bean
     public OpenAiStreamClient openAiStreamClient() {
-        OpenAiStreamClient openAiStreamClient = new OpenAiStreamClient("sk-****************");
-        return openAiStreamClient;
+        return OpenAiStreamClient.builder().apiHost("https://*************/").apiKey("sk-***************************").build();
     }
 
 }
