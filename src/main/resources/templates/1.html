@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<link href="./markdown.css" rel="stylesheet" type="text/css" />
+<link href="./markdown.css" rel="stylesheet" type="text/css"/>
 
 <head>
     <meta charset="UTF-8">
@@ -12,6 +12,7 @@
             let content = document.getElementById(uuid_str)
             content.innerHTML = marked(text);
         }
+
         function uuid() {
             var s = [];
             var hexDigits = "0123456789abcdef";
@@ -25,60 +26,63 @@
             var uuid = s.join("");
             return uuid;
         }
+
+
         window.onload = function () {
-            let connectBtn = document.getElementById("connectSSE");
             let disconnectBtn = document.getElementById("disconnectSSE");
             let messageElement = document.getElementById("message");
-            // let userIdInfoElement = document.getElementById("userIdInfo");
             let chat = document.getElementById("chat");
             let sse;
-            connectBtn.onclick = function () {
-                if (!messageElement.value) {
-                    userIdInfoElement.innerText = "userId is empty";
-                    console.log("userId is empty")
-                    return;
+            // 回车事件
+            messageElement.onkeydown = function () {
+                if (window.event.keyCode === 13) {
+                    if (!messageElement.value) {
+                        return;
+                    }
+                    let text = '';
+                    let uuid_str = uuid();
+                    const eventSource = new EventSource('http://localhost:8000/chat?message=' + messageElement.value);
+
+                    eventSource.onopen = (event) => {
+                        console.log("onopen", event.readyState, event.target);
+                        sse = event.target;
+                        //新增问题框
+                        chat.innerHTML += '<tr><td style="height: 50px;">' + messageElement.value + '</td></tr>';
+                        messageElement.value = null
+                        //新增答案框
+                        chat.innerHTML += '<tr><td><article id="' + uuid_str + '" class="markdown-body"></article></td></tr>';
+                    };
+                    eventSource.onmessage = (event) => {
+                        if (event.data == "[DONE]") {
+                            text = '';
+                            if (sse) {
+                                sse.close();
+                            }
+                            return;
+                        }
+                        let json_data = JSON.parse(event.data)
+                        if (json_data.content == null || json_data.content == 'null') {
+                            text = '';
+                            return;
+                        }
+                        text = text + json_data.content;
+                        setText(text, uuid_str)
+
+                    };
+                    eventSource.onerror = (event) => {
+                        console.log("onerror", event);
+                        alert("服务异常请重试并联系开发者！")
+                        if (event.readyState === EventSource.CLOSED) {
+                            console.log('connection is closed');
+                        } else {
+                            console.log("Error occured", event);
+                        }
+                        event.target.close();
+                    };
+                    eventSource.addEventListener("customEventName", (event) => {
+                        console.log("Message id is " + event.lastEventId);
+                    });
                 }
-                let text = '';
-                let uuid_str = uuid();
-                //新增问题框
-                chat.innerHTML += '<tr><td style="height: 50px;">' + messageElement.value + '</td></tr>';
-                //新增答案框
-                chat.innerHTML += '<tr><td><article id="' + uuid_str + '" class="markdown-body"></article></td></tr>';
-                const eventSource = new EventSource('http://localhost:8000/chat?message=' + messageElement.value);
-                eventSource.onopen = (event) => {
-                    console.log("onopen", event.readyState, event.target);
-                    sse = event.target;
-                    // let element = document.getElementById("onOpenInfo");
-                    // element.innerText = JSON.stringify(event.target);
-                };
-                eventSource.onmessage = (event) => {
-                    let element = document.getElementById(uuid_str);
-                    if (event.data == "[DONE]") {
-                        text = '';
-                        return;
-                    }
-                    let json_data = JSON.parse(event.data)
-                    if (json_data.content == null || json_data.content == 'null') {
-                        text = '';
-                        return;
-                    }
-                    text = text + json_data.content;
-                    setText(text, uuid_str)
-                };
-                eventSource.onerror = (event) => {
-                    console.log("onerror", event);
-                    if (event.readyState === EventSource.CLOSED) {
-                        console.log('connection is closed');
-                    } else {
-                        console.log("Error occured", event);
-                    }
-                    event.target.close();
-                    // let element = document.getElementById("onErrorInfo");
-                    // element.innerText = JSON.stringify(event);
-                };
-                eventSource.addEventListener("customEventName", (event) => {
-                    console.log("Message id is " + event.lastEventId);
-                });
             };
 
             disconnectBtn.onclick = function () {
@@ -92,55 +96,47 @@
 </head>
 
 <body>
-    <div class="float-card">
-        <div class="float-card-item">
-            <a href="https://www.unfbx.com" target="_blank" rel="noopener noreferrer">Website</a>
-        </div>
-        <div class="float-card-item">
-            <a href="https://github.com/Grt1228" target="_blank" rel="noopener noreferrer">Github</a>
-        </div>
+<!--<div class="float-card-item send-btn">-->
+<!--    <a id="connectSSE" rel="noopener noreferrer">发送请求</a>-->
+<!--</div>-->
+<!--<div class="float-card-item dis-btn">-->
+<!--    <a id="disconnectSSE" rel="noopener noreferrer">断开连接</a>-->
+<!--</div>-->
+<div class="float-card">
+    <div class="float-card-item">
+        <a href="https://www.unfbx.com" target="_blank" rel="noopener noreferrer">Website</a>
     </div>
-    <div class="input-card">
-        <div class="input-card-item">
-            <input style="height: 50px;width: 500px;font-size: 20px;" id="message" type="text">
-        </div>
+    <div class="float-card-item">
+        <a href="https://github.com/Grt1228" target="_blank" rel="noopener noreferrer">Github</a>
     </div>
-    <div class="container">
-        <button id="connectSSE">Connect</button>
-        <button id="disconnectSSE">Disconnect</button>
-        <table border="1">
-            <tbody id="chat">
-                <tr>
-                    <td>我是描述信息我是描述信息我是描述信息我是描述信息我是描述信息我是描述信息</td>
-                </tr>
-                <tr>
-                    <td>
-                        <article id="textContent" class="markdown-body"></article>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+    <div class="float-card-item">
+        <a id="disconnectSSE" rel="noopener noreferrer">停止输出</a>
     </div>
+</div>
+<div class="input-card">
+    <div class="input-card-item">
+        <input id="message" placeholder="输入你的问题，回车结束......" type="text">
+    </div>
+</div>
+<div class="container">
+    <table border="1">
+        <tbody id="chat">
+        <tr>
+            <td>
+                <pre style="font-size: 15px">
+                    帮忙点个star吧<br/>
+                    1、依赖ChatGPT开源Java SDK：<a rel="noopener noreferrer" href="https://github.com/Grt1228/chatgpt-java"
+                                             target="_blank" style="font-size: 15px">https://github.com/Grt1228/chatgpt-java</a><br/>
+                    2、本项目免费开源地址：<a rel="noopener noreferrer" href="https://github.com/Grt1228/chatgpt-steam-output"
+                                   target="_blank" style="font-size: 15px">https://github.com/Grt1228/chatgpt-steam-output</a><br/>
+                    3、默认保持连接5分钟，默认上下文保持10个，5分钟无请求上下文会话销毁
+                </pre>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
 
-    <!-- <div>
-        userId:
-        <span id="userIdInfo"></span>
-    </div>
-
-    <div>
-        onOpen:
-        <span id="onOpenInfo"></span>
-    </div>
-
-    <div>
-        onMessage:
-        <span id="onMessageInfo"></span>
-    </div>
-
-    <div>
-        onError:
-        <span id="onErrorInfo"></span>
-    </div> -->
 
 </body>
 <style>
@@ -158,17 +154,21 @@
         }
     }
 
-
+    input {
+        height: 50px;
+        width: 500px;
+        font-size: 20px;
+        background: url(10) no-repeat;
+        color: #d0838e;
+    }
 
     .container {
         width: 980px;
         border: 1px solid black;
         display: flex;
         flex-direction: column;
-        margin-left: 25%;
-        margin-top: 50px;
-        /* align-items: center; 
-        justify-content: center; */
+        margin-left: 150px;
+        margin-top: 40px;
     }
 
     .input-card {
@@ -178,7 +178,7 @@
         top: 80%;
     }
 
-    .imput-card-item {
+    .input-card-item {
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -189,8 +189,8 @@
     .float-card {
         position: fixed;
         display: inline-block;
-        right: 20px;
-        top: 20px;
+        right: 120px;
+        top: 100px;
     }
 
     .float-card-item {
@@ -207,6 +207,7 @@
 
     .float-card-item:last-child {
         margin-bottom: 0px;
+        background-color: #d0838e;
     }
 
     .float-card-item a {
@@ -215,26 +216,4 @@
         font-size: 13px;
     }
 </style>
-
-<script>
-    // let allText = `\n\n要获取某一个 PostgreSQL 数据库的所有 schema，可以使用以下 SQL 查询：\n\nsql\nSELECT schema_name\nFROM information_schema.schemata\nWHERE catalog_name = 'your_database_name';\n\n\n将\`your_database_name\` 替换为你要查询的数据库名称即可。这个查询将返回一个包含所有 schema 名称的结果集。\n\n如果你想要获取默认 schema 以外的所有schema，可以在查询中添加一个条件：\n\n\`\`\`sql\nSELECT schema_name\nFROM information_schema.schemata\nWHERE catalog_name = 'your_database_name'\n AND schema_name != 'public';\n\`\`\`\n\n这个查询将返回除了默认 schema\`public\` 以外的所有 schema 名称。 `
-    // let text = ''
-    // let timer = null;
-    // timer = setInterval(() => {
-
-    //     text += allText[0];
-    //     allText = allText.substring(1)
-    //     setText(text)
-    //     if (allText == '') {
-    //         clearInterval(timer)
-    //     }
-    // }, 50)
-
-    // function setText(text) {
-    //     let content = document.querySelector('#textContent')
-    //     content.innerHTML = marked(text);
-    // }
-
-</script>
-
 </html>
