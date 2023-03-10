@@ -1,6 +1,8 @@
 package com.unfbx.chatgptsteamoutput.listener;
 
+import cn.hutool.core.util.StrUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.unfbx.chatgpt.entity.chat.ChatCompletionResponse;
 import com.unfbx.chatgpt.entity.completions.CompletionResponse;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -51,10 +53,10 @@ public class OpenAIEventSourceListener extends EventSourceListener {
             return;
         }
         ObjectMapper mapper = new ObjectMapper();
-        CompletionResponse completionResponse = mapper.readValue(data, CompletionResponse.class); // 读取Json
+        ChatCompletionResponse completionResponse = mapper.readValue(data, ChatCompletionResponse.class); // 读取Json
         sseEmitter.send(SseEmitter.event()
                 .id(completionResponse.getId())
-                .data(completionResponse.getChoices()[0].getText())
+                .data(completionResponse.getChoices().get(0).getDelta())
                 .reconnectTime(3000));
     }
 

@@ -1,6 +1,7 @@
 package com.unfbx.chatgptsteamoutput;
 
 import com.unfbx.chatgpt.OpenAiStreamClient;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -14,6 +15,11 @@ import org.springframework.context.annotation.Bean;
 @SpringBootApplication
 public class ChatgptSteamOutputApplication {
 
+    @Value("${chatgpt.apiKey}")
+    private String apiKey;
+    @Value("${chatgpt.apiHost}")
+    private String apiHost;
+
     public static void main(String[] args) {
         SpringApplication.run(ChatgptSteamOutputApplication.class, args);
     }
@@ -21,8 +27,7 @@ public class ChatgptSteamOutputApplication {
 
     @Bean
     public OpenAiStreamClient openAiStreamClient() {
-        OpenAiStreamClient openAiStreamClient = new OpenAiStreamClient("sk-****************");
-        return openAiStreamClient;
+        return OpenAiStreamClient.builder().apiHost(apiHost).apiKey(apiKey).build();
     }
 
 }
