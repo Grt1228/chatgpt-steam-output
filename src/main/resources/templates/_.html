@@ -8,7 +8,6 @@
     <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
     <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
     <script src="./markdown.min.js"></script>
-    <script src="./eventsource.min.js"></script>
     <script>
         function setText(text, uuid_str) {
             let content = document.getElementById(uuid_str)
@@ -35,12 +34,6 @@
             let messageElement = document.getElementById("message");
             let chat = document.getElementById("chat");
             let sse;
-            let uid = window.localStorage.getItem("uid");
-            if(uid == null || uid == '' || uid == 'null'){
-                uid = uuid();
-            }
-            // 设置本地存储
-            window.localStorage.setItem("uid", uid);
             // 回车事件
             messageElement.onkeydown = function () {
                 if (window.event.keyCode === 13) {
@@ -49,12 +42,8 @@
                     }
                     let text = '';
                     let uuid_str = uuid();
-                    // const eventSource = new EventSource('http://localhost:8000/chat?message=' + messageElement.value);
-                    const eventSource = new EventSourcePolyfill('http://localhost:8000/chat?message=' + messageElement.value, {
-                        headers: {
-                            'uid': uid
-                        }
-                    });
+                    const eventSource = new EventSource('http://localhost:8000/chat?message=' + messageElement.value);
+
                     eventSource.onopen = (event) => {
                         console.log("onopen", event.readyState, event.target);
                         sse = event.target;
@@ -141,7 +130,7 @@
                                              target="_blank" style="font-size: 15px">https://github.com/Grt1228/chatgpt-java</a><br/>
                     2、本项目免费开源地址：<a rel="noopener noreferrer" href="https://github.com/Grt1228/chatgpt-steam-output"
                                    target="_blank" style="font-size: 15px">https://github.com/Grt1228/chatgpt-steam-output</a><br/>
-                    3、默认保持连接5分钟，默认上下文保持10个，5分钟无请求上下文会话销毁。
+                    3、默认保持连接5分钟，默认上下文保持10个，5分钟无请求上下文会话销毁
                 </pre>
             </td>
         </tr>

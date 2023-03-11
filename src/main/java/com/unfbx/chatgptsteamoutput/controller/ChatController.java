@@ -1,9 +1,6 @@
 package com.unfbx.chatgptsteamoutput.controller;
 
-import cn.hutool.cache.Cache;
-import cn.hutool.cache.CacheUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.http.server.HttpServerRequest;
 import cn.hutool.json.JSONUtil;
 import com.unfbx.chatgpt.OpenAiStreamClient;
 import com.unfbx.chatgpt.entity.chat.Message;
@@ -13,7 +10,10 @@ import com.unfbx.chatgptsteamoutput.config.LocalCache;
 import com.unfbx.chatgptsteamoutput.listener.OpenAIEventSourceListener;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
@@ -42,11 +42,11 @@ public class ChatController {
     @CrossOrigin
     public SseEmitter chat(@RequestParam("message") String msg, @RequestHeader Map<String, String> headers) throws IOException {
         SseEmitter sseEmitter = new SseEmitter(20000l);
-        String cookie = headers.get("cookie");
-        if (StrUtil.isBlank(cookie)) {
+        String uid = headers.get("uid");
+        if (StrUtil.isBlank(uid)) {
             throw new BaseException(CommonError.SYS_ERROR);
         }
-        String messageContext = (String) LocalCache.CACHE.get(cookie);
+        String messageContext = (String) LocalCache.CACHE.get(uid);
         List<Message> messages = new ArrayList<>();
         if (StrUtil.isNotBlank(messageContext)) {
             messages = JSONUtil.toList(messageContext, Message.class);
@@ -59,11 +59,11 @@ public class ChatController {
             Message currentMessage = Message.builder().content(msg).role(Message.Role.USER).build();
             messages.add(currentMessage);
         }
-        sseEmitter.send(SseEmitter.event().id(cookie).name("连接成功！！！！").data(LocalDateTime.now()).reconnectTime(3000));
+        sseEmitter.send(SseEmitter.event().id(uid).name("连接成功！！！！").data(LocalDateTime.now()).reconnectTime(3000));
         sseEmitter.onCompletion(() -> {
-            log.info(LocalDateTime.now() + ", uid#" + cookie + ", on completion");
+            log.info(LocalDateTime.now() + ", uid#" + uid + ", on completion");
         });
-        sseEmitter.onTimeout(() -> log.info(LocalDateTime.now() + ", uid#" + cookie + ", on timeout#" + sseEmitter.getTimeout()));
+        sseEmitter.onTimeout(() -> log.info(LocalDateTime.now() + ", uid#" + uid + ", on timeout#" + sseEmitter.getTimeout()));
         sseEmitter.onError(
                 throwable -> {
                     try {
@@ -76,7 +76,7 @@ public class ChatController {
         );
         OpenAIEventSourceListener openAIEventSourceListener = new OpenAIEventSourceListener(sseEmitter);
         openAiStreamClient.streamChatCompletion(messages, openAIEventSourceListener);
-        LocalCache.CACHE.put(cookie, JSONUtil.toJsonStr(messages), LocalCache.TIMEOUT);
+        LocalCache.CACHE.put(uid, JSONUtil.toJsonStr(messages), LocalCache.TIMEOUT);
         return sseEmitter;
     }
 
