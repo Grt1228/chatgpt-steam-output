@@ -24,7 +24,7 @@ git clone https://github.com/Grt1228/chatgpt-steam-output
 ```
 ## 修改配置
 修改application.properties文件
-默认8000端口，可以自己修改，修改端口的哈记得将：1.html文件的8000端口也替换掉
+默认8000端口，可以自己修改，修改端口记得将1.html文件的8000端口也替换掉
 ```
 server.port=8000
 chatgpt.apiKey=配置自己的key
