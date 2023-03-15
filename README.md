@@ -1,7 +1,7 @@
 # 简介
 Open AI ChatGPT流式输出。Open AI Stream output. ChatGPT Stream output.
 
-**此项目只是对[chatgpt-java](https://github.com/Grt1228/chatgpt-java) SDK的一个简单示例项目，实现流式输出，仅做参考。大家最好还是自己动手实现**
+**此项目只是对[chatgpt-java](https://github.com/Grt1228/chatgpt-java) SDK的一个简单示例项目，实现流式输出，仅做参考。大家最好还是自己基于SDK动手实现**
 
 **最新版SDK参考：https://github.com/Grt1228/chatgpt-java**
 
