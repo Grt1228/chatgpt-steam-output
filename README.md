@@ -1,8 +1,14 @@
 # 简介
 Open AI ChatGPT流式输出。Open AI Stream output. ChatGPT Stream output.
-**此项目只是对chatgpt-java SDK的一个简单示例项目，实现流式输出，仅做参考。大家最好还是自己动手实现**
+
+**此项目只是对[chatgpt-java](https://github.com/Grt1228/chatgpt-java) SDK的一个简单示例项目，实现流式输出，仅做参考。大家最好还是自己动手实现**
 
 **最新版SDK参考：https://github.com/Grt1228/chatgpt-java**
+
+交流群：
+<img src="https://user-images.githubusercontent.com/27008803/225246389-7b452214-f3fe-4a70-bd3e-832a0ed34288.jpg" width="210" height="300" alt="二维码" />
+群满加微信拉：
+<img src="https://user-images.githubusercontent.com/27008803/225246581-15e90f78-5438-4637-8e7d-14c68ca13b59.jpg" width="210" height="300" alt="二维码" />
 
 # SSE
 主要是基于[SSE](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#event_stream_format) 实现的（可以百度下这个技术）。也是最近在了解到SSE。OpenAI官网在接受Completions接口的时候，有提到过这个技术。
