@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
-<link href="./markdown.css" rel="stylesheet" type="text/css"/>
+<link href="css/markdown.css" rel="stylesheet" type="text/css"/>
 
 <head>
     <meta charset="UTF-8">
     <title>战损版ChatGPT</title>
-    <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="image/favicon-32x32.png">
     <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
-    <script src="./markdown.min.js"></script>
-    <script src="./eventsource.min.js"></script>
+    <script src="js/markdown.min.js"></script>
+    <script src="js/eventsource.min.js"></script>
     <script>
         function setText(text, uuid_str) {
             let content = document.getElementById(uuid_str)
@@ -36,7 +36,7 @@
             let chat = document.getElementById("chat");
             let sse;
             let uid = window.localStorage.getItem("uid");
-            if(uid == null || uid == '' || uid == 'null'){
+            if (uid == null || uid == '' || uid == 'null') {
                 uid = uuid();
             }
             // 设置本地存储
@@ -50,7 +50,7 @@
                     let text = '';
                     let uuid_str = uuid();
                     // const eventSource = new EventSource('http://localhost:8000/chat?message=' + messageElement.value);
-                    const eventSource = new EventSourcePolyfill('http://localhost:8000/chat?message=' + messageElement.value, {
+                    const eventSource = new EventSourcePolyfill('/chat?message=' + messageElement.value, {
                         headers: {
                             'uid': uid
                         }
@@ -105,6 +105,7 @@
 
         };
     </script>
+    <!--    <script src="js/eventsource.min.js"></script>-->
 </head>
 
 <body>
