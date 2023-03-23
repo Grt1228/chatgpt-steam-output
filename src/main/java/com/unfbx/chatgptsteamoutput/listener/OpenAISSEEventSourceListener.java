@@ -21,11 +21,11 @@ import java.util.Objects;
  * @date 2023-02-22
  */
 @Slf4j
-public class OpenAIEventSourceListener extends EventSourceListener {
+public class OpenAISSEEventSourceListener extends EventSourceListener {
 
     private SseEmitter sseEmitter;
 
-    public OpenAIEventSourceListener(SseEmitter sseEmitter) {
+    public OpenAISSEEventSourceListener(SseEmitter sseEmitter) {
         this.sseEmitter = sseEmitter;
     }
 
