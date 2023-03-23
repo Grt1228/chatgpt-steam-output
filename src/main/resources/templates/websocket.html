@@ -4,11 +4,12 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>战损版ChatGPT-SSE实现流式输出</title>
+    <title>战损版ChatGPT-WebSocket实现流式输出</title>
     <link rel="icon" type="image/png" sizes="32x32" href="image/favicon-32x32.png">
     <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
     <script src="js/markdown.min.js"></script>
-    <script src="js/eventsource.min.js"></script>
+
+
     <script>
         function setText(text, uuid_str) {
             let content = document.getElementById(uuid_str)
@@ -31,81 +32,83 @@
 
 
         window.onload = function () {
+            var socket
+            let uuid_str = '';
+            let text = '';
             let disconnectBtn = document.getElementById("disconnectSSE");
             let messageElement = document.getElementById("message");
             let chat = document.getElementById("chat");
-            let sse;
             let uid = window.localStorage.getItem("uid");
             if (uid == null || uid == '' || uid == 'null') {
                 uid = uuid();
             }
             // 设置本地存储
             window.localStorage.setItem("uid", uid);
+            if (typeof (WebSocket) == "undefined") {
+                console.log("您的浏览器不支持WebSocket");
+            } else {
+                console.log("您的浏览器支持WebSocket");
+                //实现化WebSocket对象
+                //指定要连接的服务器地址与端口建立连接
+                //注意ws、wss使用不同的端口。我使用自签名的证书测试，
+                //无法使用wss，浏览器打开WebSocket时报错
+                //ws对应http、wss对应https。
+                socket = new WebSocket("ws://localhost:8000/websocket/"+uid);
+                //连接打开事件
+                socket.onopen = function () {
+                    console.log("Socket 已打开");
+                };
+                //收到消息事件
+                socket.onmessage = function (msg) {
+                    if (msg.data == "[DONE]") {
+                        text = '';
+                        return;
+                    }
+                    let json_data = JSON.parse(msg.data)
+                    if (json_data.content == null || json_data.content == 'null') {
+                        text = '';
+                        return;
+                    }
+                    text = text + json_data.content;
+                    setText(text, uuid_str)
+                };
+                //连接关闭事件
+                socket.onclose = function () {
+                    console.log("Socket已关闭");
+                };
+                //发生了错误事件
+                socket.onerror = function () {
+                    alert("服务异常请重试并联系开发者！")
+                }
+                //窗口关闭时，关闭连接
+                window.unload = function () {
+                    socket.close();
+                };
+            }
             // 回车事件
             messageElement.onkeydown = function () {
                 if (window.event.keyCode === 13) {
                     if (!messageElement.value) {
                         return;
                     }
-                    let text = '';
-                    let uuid_str = uuid();
-                    // const eventSource = new EventSource('http://localhost:8000/chat?message=' + messageElement.value);
-                    const eventSource = new EventSourcePolyfill('/chat?message=' + messageElement.value, {
-                        headers: {
-                            'uid': uid
-                        }
-                    });
-                    eventSource.onopen = (event) => {
-                        console.log("onopen", event.readyState, event.target);
-                        sse = event.target;
-                        //新增问题框
-                        chat.innerHTML += '<tr><td style="height: 50px;">' + messageElement.value + '</td></tr>';
-                        messageElement.value = null
-                        //新增答案框
-                        chat.innerHTML += '<tr><td><article id="' + uuid_str + '" class="markdown-body"></article></td></tr>';
-                    };
-                    eventSource.onmessage = (event) => {
-                        if (event.data == "[DONE]") {
-                            text = '';
-                            if (sse) {
-                                sse.close();
-                            }
-                            return;
-                        }
-                        let json_data = JSON.parse(event.data)
-                        if (json_data.content == null || json_data.content == 'null') {
-                            text = '';
-                            return;
-                        }
-                        text = text + json_data.content;
-                        setText(text, uuid_str)
-
-                    };
-                    eventSource.onerror = (event) => {
-                        console.log("onerror", event);
-                        alert("服务异常请重试并联系开发者！")
-                        if (event.readyState === EventSource.CLOSED) {
-                            console.log('connection is closed');
-                        } else {
-                            console.log("Error occured", event);
-                        }
-                        event.target.close();
-                    };
-                    eventSource.addEventListener("customEventName", (event) => {
-                        console.log("Message id is " + event.lastEventId);
-                    });
+                    uuid_str = uuid();
+                    socket.send(messageElement.value);
+                    //新增问题框
+                    chat.innerHTML += '<tr><td style="height: 50px;">' + messageElement.value + '</td></tr>';
+                    messageElement.value = null
+                    //新增答案框
+                    chat.innerHTML += '<tr><td><article id="' + uuid_str + '" class="markdown-body"></article></td></tr>';
                 }
             };
 
             disconnectBtn.onclick = function () {
-                if (sse) {
-                    sse.close();
+                if (socket) {
+                    socket.close();
                 }
             };
 
         };
     </script>
-    <!--    <script src="js/eventsource.min.js"></script>-->
 </head>
 
 <body>
