@@ -2,8 +2,15 @@
 Open AI ChatGPT流式输出。Open AI Stream output. ChatGPT Stream output.
 
 **此项目只是对[chatgpt-java](https://github.com/Grt1228/chatgpt-java) SDK的一个简单示例项目，实现流式输出，仅做参考。大家最好还是自己基于SDK动手实现**
+---
+### 目前本项目支持两种流式输出，基于[ChatGPT-Java SDK](https://github.com/Grt1228/chatgpt-java) 。
 
-**最新版SDK参考：https://github.com/Grt1228/chatgpt-java**
+流式输出实现方式 | 小程序 | 安卓 | ios | H5 
+---|---|---|---|---
+SSE参考：[OpenAISSEEventSourceListener](https://github.com/Grt1228/chatgpt-steam-output/blob/main/src/main/java/com/unfbx/chatgptsteamoutput/listener/OpenAISSEEventSourceListener.java) | 不支持| 支持| 支持 | 支持
+WebSocket参考：[OpenAIWebSocketEventSourceListener](https://github.com/Grt1228/chatgpt-steam-output/blob/main/src/main/java/com/unfbx/chatgptsteamoutput/listener/OpenAIWebSocketEventSourceListener.java) | 支持| 支持| 支持| 支持
+---
+**最新版SDK参考：https://github.com/Grt1228/chatgpt-java** 有疑问加群**免费**解答。
 
 交流群：
 <img src="https://user-images.githubusercontent.com/27008803/225246389-7b452214-f3fe-4a70-bd3e-832a0ed34288.jpg" width="210" height="300" alt="二维码" />
@@ -18,12 +25,12 @@ Completion对象本身有一个stream属性，当stream为true时候Api的Respon
 
 ## 依赖
 最新版参考：https://github.com/Grt1228/chatgpt-java
-目前是1.0.5版本
+目前是1.0.7版本
 ```
 <dependency>
     <groupId>com.unfbx</groupId>
     <artifactId>chatgpt-java</artifactId>
-    <version>1.0.5</version>
+    <version>1.0.7</version>
 </dependency>
 ```
 # 项目部署
