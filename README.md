@@ -55,7 +55,8 @@ com.unfbx.chatgptsteamoutput.ChatgptSteamOutputApplication
 运行成功后打开浏览器：
 
 ```
-http://localhost:8000/
+sse实现：http://localhost:8000/
+websocket实现：http://localhost:8000/websocket   
 ```
 能打开此页面表示运行成功
 <img width="1080" alt="1" src="https://user-images.githubusercontent.com/27008803/224496424-b75465a0-32fb-491a-934c-c9c524cf5be7.png">
