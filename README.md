@@ -32,7 +32,7 @@ Completion对象本身有一个stream属性，当stream为true时候Api的Respon
 <dependency>
     <groupId>com.unfbx</groupId>
     <artifactId>chatgpt-java</artifactId>
-    <version>1.0.7</version>
+    <version>1.0.9</version>
 </dependency>
 ```
 # 项目部署
@@ -65,4 +65,6 @@ websocket实现：http://localhost:8000/websocket
 
 
 代码其实很简单，小伙伴们可以下载代码来看下。
+# 如果项目对你有帮助，可以选择请我喝杯奶茶
 
+<img width="156" alt="微信截图_20230405222411" src="https://user-images.githubusercontent.com/27008803/230111508-3179cf30-e128-4b2e-9645-157266c491ce.png"><img width="164" alt="微信截图_20230405222357" src="https://user-images.githubusercontent.com/27008803/230111525-322f5036-d06d-46bb-94d1-db8ce9ed2adf.png">
