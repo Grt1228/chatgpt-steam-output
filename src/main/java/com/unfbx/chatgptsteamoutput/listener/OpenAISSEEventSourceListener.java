@@ -1,9 +1,7 @@
 package com.unfbx.chatgptsteamoutput.listener;
 
-import cn.hutool.core.util.StrUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.unfbx.chatgpt.entity.chat.ChatCompletionResponse;
-import com.unfbx.chatgpt.entity.completions.CompletionResponse;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Response;
@@ -22,6 +20,8 @@ import java.util.Objects;
  */
 @Slf4j
 public class OpenAISSEEventSourceListener extends EventSourceListener {
+
+    private long tokens;
 
     private SseEmitter sseEmitter;
 
@@ -44,6 +44,7 @@ public class OpenAISSEEventSourceListener extends EventSourceListener {
     @Override
     public void onEvent(EventSource eventSource, String id, String type, String data) {
         log.info("OpenAI返回数据：{}", data);
+        tokens += 1;
         if (data.equals("[DONE]")) {
             log.info("OpenAI返回数据结束了");
             sseEmitter.send(SseEmitter.event()
@@ -63,6 +64,7 @@ public class OpenAISSEEventSourceListener extends EventSourceListener {
 
     @Override
     public void onClosed(EventSource eventSource) {
+        log.info("流式输出返回值总共{}tokens", tokens() - 2);
         log.info("OpenAI关闭sse连接...");
     }
 
@@ -80,5 +82,9 @@ public class OpenAISSEEventSourceListener extends EventSourceListener {
             log.error("OpenAI  sse连接异常data：{}，异常：{}", response, t);
         }
         eventSource.cancel();
+    }
+
+    public long tokens() {
+        return tokens;
     }
 }
