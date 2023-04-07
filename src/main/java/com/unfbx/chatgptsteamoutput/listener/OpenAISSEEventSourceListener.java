@@ -51,6 +51,8 @@ public class OpenAISSEEventSourceListener extends EventSourceListener {
                     .id("[DONE]")
                     .data("[DONE]")
                     .reconnectTime(3000));
+            // 传输完成后自动关闭sse
+            sseEmitter.complete();
             return;
         }
         ObjectMapper mapper = new ObjectMapper();
