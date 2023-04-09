@@ -39,61 +39,95 @@
             if (uid == null || uid == '' || uid == 'null') {
                 uid = uuid();
             }
+            let text = '';
+            let uuid_str;
             // 设置本地存储
             window.localStorage.setItem("uid", uid);
+            //进入页面就创建sse连接
+            // const eventSource = new EventSource('http://localhost:8000/chat?message=' + messageElement.value);
+            const eventSource = new EventSourcePolyfill('/createSse', {
+                headers: {
+                    'uid': uid
+                }
+            });
+
+            eventSource.onopen = (event) => {
+                console.log("onopen", event.readyState, event.target);
+                sse = event.target;
+                //新增问题框
+                chat.innerHTML += '<tr><td style="height: 50px;">' + messageElement.value + '</td></tr>';
+                messageElement.value = null
+                //新增答案框
+                chat.innerHTML += '<tr><td><article id="' + uuid_str + '" class="markdown-body"></article></td></tr>';
+            };
+            eventSource.onmessage = (event) => {
+                if (event.data == "[DONE]") {
+                    text = '';
+                    if (sse) {
+                        sse.close();
+                    }
+                    return;
+                }
+                let json_data = JSON.parse(event.data)
+                if (json_data.content == null || json_data.content == 'null') {
+                    text = '';
+                    return;
+                }
+                text = text + json_data.content;
+                setText(text, uuid_str)
+
+            };
+            eventSource.onerror = (event) => {
+                console.log("onerror", event);
+                alert("服务异常请重试并联系开发者！")
+                if (event.readyState === EventSource.CLOSED) {
+                    console.log('connection is closed');
+                } else {
+                    console.log("Error occured", event);
+                }
+                event.target.close();
+            };
+            eventSource.addEventListener("customEventName", (event) => {
+                console.log("Message id is " + event.lastEventId);
+            });
+            eventSource.addEventListener("customEventName", (event) => {
+                console.log("Message id is " + event.lastEventId);
+            });
+
             // 回车事件
             messageElement.onkeydown = function () {
                 if (window.event.keyCode === 13) {
                     if (!messageElement.value) {
                         return;
                     }
-                    let text = '';
-                    let uuid_str = uuid();
-                    // const eventSource = new EventSource('http://localhost:8000/chat?message=' + messageElement.value);
-                    const eventSource = new EventSourcePolyfill('/chat?message=' + messageElement.value, {
+                    uuid_str = uuid();
+                    $.ajax({
+                        type: 'post',
+                        url: '/chat',
+                        data: {'msg': messageElement.value},
+                        contentType:"application/json;charset=UTF-8",
                         headers: {
-                            'uid': uid
+                            "uid" : uid,
+                            // "Content-Type": "application/json;charset=utf-8"
+                        },
+                        beforeSend:function (request) {
+                            // 如果后台没有跨域处理，这个自定义
+                        },
+                        success: function (data) {
+                            debugger
+                            console.log(data)
+                        },
+                        complete: function () {
+                        },
+                        error:function(data){
+                            console.info("error: " + data.responseText);
                         }
-                    });
-                    eventSource.onopen = (event) => {
-                        console.log("onopen", event.readyState, event.target);
-                        sse = event.target;
-                        //新增问题框
-                        chat.innerHTML += '<tr><td style="height: 50px;">' + messageElement.value + '</td></tr>';
-                        messageElement.value = null
-                        //新增答案框
-                        chat.innerHTML += '<tr><td><article id="' + uuid_str + '" class="markdown-body"></article></td></tr>';
-                    };
-                    eventSource.onmessage = (event) => {
-                        if (event.data == "[DONE]") {
-                            text = '';
-                            if (sse) {
-                                sse.close();
-                            }
-                            return;
-                        }
-                        let json_data = JSON.parse(event.data)
-                        if (json_data.content == null || json_data.content == 'null') {
-                            text = '';
-                            return;
-                        }
-                        text = text + json_data.content;
-                        setText(text, uuid_str)
+                    })
 
-                    };
-                    eventSource.onerror = (event) => {
-                        console.log("onerror", event);
-                        alert("服务异常请重试并联系开发者！")
-                        if (event.readyState === EventSource.CLOSED) {
-                            console.log('connection is closed');
-                        } else {
-                            console.log("Error occured", event);
-                        }
-                        event.target.close();
-                    };
-                    eventSource.addEventListener("customEventName", (event) => {
-                        console.log("Message id is " + event.lastEventId);
-                    });
+                    //发送请求
+                    $.post("/chat", {msg: messageElement.value}, function (result) {
+                        $("span").html(result);
+                    },"json");
                 }
             };
 
@@ -171,7 +205,7 @@
         height: 50px;
         width: 500px;
         font-size: 20px;
-        background: url(10) no-repeat;
+        background: no-repeat;
         color: #d0838e;
     }
 

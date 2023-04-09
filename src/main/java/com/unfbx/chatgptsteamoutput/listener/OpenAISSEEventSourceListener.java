@@ -57,10 +57,15 @@ public class OpenAISSEEventSourceListener extends EventSourceListener {
         }
         ObjectMapper mapper = new ObjectMapper();
         ChatCompletionResponse completionResponse = mapper.readValue(data, ChatCompletionResponse.class); // 读取Json
-        sseEmitter.send(SseEmitter.event()
-                .id(completionResponse.getId())
-                .data(completionResponse.getChoices().get(0).getDelta())
-                .reconnectTime(3000));
+        try {
+            sseEmitter.send(SseEmitter.event()
+                    .id(completionResponse.getId())
+                    .data(completionResponse.getChoices().get(0).getDelta())
+                    .reconnectTime(3000));
+        } catch (Exception e) {
+            log.error("sse信息推送失败！");
+            e.printStackTrace();
+        }
     }
 
 
@@ -74,7 +79,7 @@ public class OpenAISSEEventSourceListener extends EventSourceListener {
     @SneakyThrows
     @Override
     public void onFailure(EventSource eventSource, Throwable t, Response response) {
-        if(Objects.isNull(response)){
+        if (Objects.isNull(response)) {
             return;
         }
         ResponseBody body = response.body();
@@ -86,6 +91,10 @@ public class OpenAISSEEventSourceListener extends EventSourceListener {
         eventSource.cancel();
     }
 
+    /**
+     * tokens
+     * @return
+     */
     public long tokens() {
         return tokens;
     }
