@@ -1,16 +1,17 @@
 package com.unfbx.chatgptsteamoutput.controller;
 
 import cn.hutool.core.util.StrUtil;
-import com.unfbx.chatgpt.OpenAiStreamClient;
 import com.unfbx.chatgpt.exception.BaseException;
 import com.unfbx.chatgpt.exception.CommonError;
 import com.unfbx.chatgptsteamoutput.controller.request.ChatRequest;
+import com.unfbx.chatgptsteamoutput.controller.response.ChatResponse;
 import com.unfbx.chatgptsteamoutput.service.SseService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
 
 /**
@@ -50,9 +51,10 @@ public class ChatController {
      */
     @CrossOrigin
     @PostMapping("/chat")
-    public void sseChat(@RequestBody ChatRequest chatRequest, @RequestHeader Map<String, String> headers) {
+    @ResponseBody
+    public ChatResponse sseChat(@RequestBody ChatRequest chatRequest, @RequestHeader Map<String, String> headers, HttpServletResponse response) {
         String uid = getUid(headers);
-        sseService.sseChat(uid, chatRequest);
+        return sseService.sseChat(uid, chatRequest);
     }
 
     /**

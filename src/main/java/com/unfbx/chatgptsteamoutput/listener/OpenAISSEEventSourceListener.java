@@ -2,6 +2,7 @@ package com.unfbx.chatgptsteamoutput.listener;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.unfbx.chatgpt.entity.chat.ChatCompletionResponse;
+import com.unfbx.chatgptsteamoutput.config.LocalCache;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Response;
@@ -48,6 +49,10 @@ public class OpenAISSEEventSourceListener extends EventSourceListener {
         if (data.equals("[DONE]")) {
             log.info("OpenAI返回数据结束了");
             sseEmitter.send(SseEmitter.event()
+                    .id("[TOKENS]")
+                    .data("<br/><br/>tokens：" + tokens())
+                    .reconnectTime(3000));
+            sseEmitter.send(SseEmitter.event()
                     .id("[DONE]")
                     .data("[DONE]")
                     .reconnectTime(3000));
@@ -64,6 +69,7 @@ public class OpenAISSEEventSourceListener extends EventSourceListener {
                     .reconnectTime(3000));
         } catch (Exception e) {
             log.error("sse信息推送失败！");
+            eventSource.cancel();
             e.printStackTrace();
         }
     }

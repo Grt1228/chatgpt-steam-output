@@ -1,6 +1,7 @@
 package com.unfbx.chatgptsteamoutput.service;
 
 import com.unfbx.chatgptsteamoutput.controller.request.ChatRequest;
+import com.unfbx.chatgptsteamoutput.controller.response.ChatResponse;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 /**
@@ -28,6 +29,5 @@ public interface SseService {
      * @param uid
      * @param chatRequest
      */
-    void sseChat(String uid, ChatRequest chatRequest);
-
+    ChatResponse sseChat(String uid, ChatRequest chatRequest);
 }

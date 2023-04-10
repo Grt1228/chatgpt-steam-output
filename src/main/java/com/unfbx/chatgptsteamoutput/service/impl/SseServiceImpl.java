@@ -1,16 +1,18 @@
 package com.unfbx.chatgptsteamoutput.service.impl;
 
+import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.unfbx.chatgpt.OpenAiStreamClient;
+import com.unfbx.chatgpt.entity.chat.ChatCompletion;
 import com.unfbx.chatgpt.entity.chat.Message;
+import com.unfbx.chatgpt.exception.BaseException;
 import com.unfbx.chatgptsteamoutput.config.LocalCache;
 import com.unfbx.chatgptsteamoutput.controller.request.ChatRequest;
+import com.unfbx.chatgptsteamoutput.controller.response.ChatResponse;
 import com.unfbx.chatgptsteamoutput.listener.OpenAISSEEventSourceListener;
 import com.unfbx.chatgptsteamoutput.service.SseService;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -52,20 +54,19 @@ public class SseServiceImpl implements SseService {
                 throwable -> {
                     try {
                         log.info("[{}]连接异常,{}", uid, throwable.toString());
-                        sseEmitter.send(SseEmitter.event().id(uid).name("发生异常！").data("发生异常请重试！").reconnectTime(3000));
+                        sseEmitter.send(SseEmitter.event()
+                                .id(uid)
+                                .name("发生异常！")
+                                .data(Message.builder().content("发生异常请重试！").build())
+                                .reconnectTime(3000));
+                        LocalCache.CACHE.put(uid, sseEmitter);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
         );
         LocalCache.CACHE.put(uid, sseEmitter);
-        log.info("[{}]创建sse连接...................", uid);
-        try {
-            sseEmitter.send(SseEmitter.event().data("[" + uid + "]创连接成功！", MediaType.APPLICATION_JSON));
-        } catch (Exception e) {
-            log.info("[{}]创建sse连接异常...................", uid);
-            e.printStackTrace();
-        }
+        log.info("[{}]创建sse连接成功！", uid);
         return sseEmitter;
     }
 
@@ -80,12 +81,12 @@ public class SseServiceImpl implements SseService {
     }
 
     @Override
-    public void sseChat(String uid, ChatRequest chatRequest) {
+    public ChatResponse sseChat(String uid, ChatRequest chatRequest) {
         if (StrUtil.isBlank(chatRequest.getMsg())) {
             log.info("参数异常，msg为null", uid);
-            return;
+            throw new BaseException("参数异常，msg不能为空~");
         }
-        String messageContext = (String) LocalCache.CACHE.get(uid);
+        String messageContext = (String) LocalCache.CACHE.get("msg" + uid);
         List<Message> messages = new ArrayList<>();
         if (StrUtil.isNotBlank(messageContext)) {
             messages = JSONUtil.toList(messageContext, Message.class);
@@ -103,10 +104,18 @@ public class SseServiceImpl implements SseService {
 
         if (sseEmitter == null) {
             log.info("聊天消息推送失败uid:[{}],没有创建连接，请重试。", uid);
-            return;
+            throw new BaseException("聊天消息推送失败uid:[{}],没有创建连接，请重试。~");
         }
         OpenAISSEEventSourceListener openAIEventSourceListener = new OpenAISSEEventSourceListener(sseEmitter);
-        openAiStreamClient.streamChatCompletion(messages, openAIEventSourceListener);
-        LocalCache.CACHE.put(uid, JSONUtil.toJsonStr(messages), LocalCache.TIMEOUT);
+        ChatCompletion completion = ChatCompletion
+                .builder()
+                .messages(messages)
+                .model(ChatCompletion.Model.GPT_3_5_TURBO.getName())
+                .build();
+        openAiStreamClient.streamChatCompletion(completion, openAIEventSourceListener);
+        LocalCache.CACHE.put("msg" + uid, JSONUtil.toJsonStr(messages), LocalCache.TIMEOUT);
+        ChatResponse response = new ChatResponse();
+        response.setQuestionTokens(completion.tokens());
+        return response;
     }
 }
