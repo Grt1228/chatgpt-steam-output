@@ -7,7 +7,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 /**
  * 描述：
  *
- * @author grt
+ * @author https:www.unfbx.com
  * @date 2023-04-08
  */
 public interface SseService {
