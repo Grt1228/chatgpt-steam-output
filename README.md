@@ -27,12 +27,12 @@ Completion对象本身有一个stream属性，当stream为true时候Api的Respon
 
 ## 依赖
 最新版参考：https://github.com/Grt1228/chatgpt-java
-目前是1.0.10版本
+目前是1.0.12版本
 ```
 <dependency>
     <groupId>com.unfbx</groupId>
     <artifactId>chatgpt-java</artifactId>
-    <version>1.0.10</version>
+    <version>1.0.12</version>
 </dependency>
 ```
 # 项目部署
