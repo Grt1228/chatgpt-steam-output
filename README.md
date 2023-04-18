@@ -1,9 +1,10 @@
 # 简介
-Open AI ChatGPT流式输出。Open AI Stream output. ChatGPT Stream output.
+Open AI ChatGPT流式输出。Open AI Stream output. ChatGPT Stream output、
+支持Tokens计算。
 
 **此项目只是对[chatgpt-java](https://github.com/Grt1228/chatgpt-java) SDK的一个简单示例项目，实现流式输出，仅做参考仅做参考仅做参考。大家最好还是自己基于SDK动手实现**
 ---
-### 目前本项目支持两种流式输出，基于[ChatGPT-Java SDK](https://github.com/Grt1228/chatgpt-java) 。
+### 目前本项目支持两种流式输出，支持Tokens计算，基于[ChatGPT-Java SDK](https://github.com/Grt1228/chatgpt-java) 。
 
 流式输出实现方式 | 小程序 | 安卓 | ios | H5 
 ---|---|---|---|---
@@ -61,7 +62,7 @@ sse实现：http://localhost:8000/
 websocket实现：http://localhost:8000/websocket   
 ```
 能打开此页面表示运行成功
-<img width="1080" alt="1" src="https://user-images.githubusercontent.com/27008803/224496424-b75465a0-32fb-491a-934c-c9c524cf5be7.png">
+<img width="954" alt="8ccfe107fc10deffdf7fac42b95547b" src="https://user-images.githubusercontent.com/27008803/230941561-79e344ed-b751-40c7-9a59-cbe5216923b1.png">
 
 
 代码其实很简单，小伙伴们可以下载代码来看下。
