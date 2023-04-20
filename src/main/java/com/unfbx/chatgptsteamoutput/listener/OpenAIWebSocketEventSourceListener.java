@@ -92,7 +92,7 @@ public class OpenAIWebSocketEventSourceListener extends EventSourceListener {
 
     @Override
     public void onClosed(EventSource eventSource) {
-        log.info("OpenAI关闭WebSocket连接...");
+        log.info("OpenAI关闭sse连接...");
     }
 
     @SneakyThrows
@@ -103,9 +103,9 @@ public class OpenAIWebSocketEventSourceListener extends EventSourceListener {
         }
         ResponseBody body = response.body();
         if (Objects.nonNull(body)) {
-            log.error("OpenAI sse连接异常data：{}，异常：{}", body.string(), t);
+            log.error("OpenAI  sse连接异常data：{}，异常：{}", body.string(), t);
         } else {
-            log.error("OpenAI sse连接异常data：{}，异常：{}", response, t);
+            log.error("OpenAI  sse连接异常data：{}，异常：{}", response, t);
         }
         eventSource.cancel();
     }
