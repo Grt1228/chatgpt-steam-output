@@ -2,25 +2,17 @@ package com.unfbx.chatgptsteamoutput.websocket;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.unfbx.chatgpt.OpenAiStreamClient;
 import com.unfbx.chatgpt.entity.chat.Message;
-import com.unfbx.chatgpt.exception.BaseException;
-import com.unfbx.chatgpt.exception.CommonError;
 import com.unfbx.chatgptsteamoutput.config.LocalCache;
-import com.unfbx.chatgptsteamoutput.listener.OpenAISSEEventSourceListener;
 import com.unfbx.chatgptsteamoutput.listener.OpenAIWebSocketEventSourceListener;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
-import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -118,7 +110,7 @@ public class WebSocketServer {
     public void onMessage(String msg) {
         log.info("[连接ID:{}] 收到消息:{}", this.uid, msg);
         //接受参数
-        OpenAIWebSocketEventSourceListener eventSourceListener = new OpenAIWebSocketEventSourceListener(this.session);
+        OpenAIWebSocketEventSourceListener eventSourceListener = new OpenAIWebSocketEventSourceListener(this.session, uid);
         String messageContext = (String) LocalCache.CACHE.get(uid);
         List<Message> messages = new ArrayList<>();
         if (StrUtil.isNotBlank(messageContext)) {

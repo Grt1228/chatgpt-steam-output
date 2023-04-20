@@ -1,6 +1,5 @@
 package com.unfbx.chatgptsteamoutput.service.impl;
 
-import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.unfbx.chatgpt.OpenAiStreamClient;
@@ -106,7 +105,7 @@ public class SseServiceImpl implements SseService {
             log.info("聊天消息推送失败uid:[{}],没有创建连接，请重试。", uid);
             throw new BaseException("聊天消息推送失败uid:[{}],没有创建连接，请重试。~");
         }
-        OpenAISSEEventSourceListener openAIEventSourceListener = new OpenAISSEEventSourceListener(sseEmitter);
+        OpenAISSEEventSourceListener openAIEventSourceListener = new OpenAISSEEventSourceListener(sseEmitter, uid);
         ChatCompletion completion = ChatCompletion
                 .builder()
                 .messages(messages)
