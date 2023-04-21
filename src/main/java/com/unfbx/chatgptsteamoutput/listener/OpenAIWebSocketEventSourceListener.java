@@ -82,6 +82,7 @@ public class OpenAIWebSocketEventSourceListener extends EventSourceListener {
         if (StrUtil.isNotBlank(messageContext)) {
             messages = JSONUtil.toList(messageContext, Message.class);
         }
+        log.info("OpenAI返回的全部数据:{}", answerBuffer.toString());
         // 添加本轮对话AI的回答
         Message currentMessage =
             Message.builder().content(answerBuffer.toString()).role(Message.Role.ASSISTANT).build();
