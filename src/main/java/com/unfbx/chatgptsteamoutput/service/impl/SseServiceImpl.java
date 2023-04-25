@@ -65,6 +65,11 @@ public class SseServiceImpl implements SseService {
                     }
                 }
         );
+        try {
+            sseEmitter.send(SseEmitter.event().reconnectTime(5000));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         LocalCache.CACHE.put(uid, sseEmitter);
         log.info("[{}]创建sse连接成功！", uid);
         return sseEmitter;
